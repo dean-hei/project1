@@ -1,16 +1,16 @@
-#Project: Minecraft Mini
-###by dean
+# Project: Minecraft Mini
+### by dean
 
-##1. Basic Game Idea
+## 1. Basic Game Idea
 I want to build a pared down version of minecraft (name subject to change). It will be two dimensional and have limited function, but essentially be a platformer with scenery manipulation.
 
-##2. Tech
+## 2. Tech
 I will use basic HTML, CSS, and JS to create a viewer window where the game takes place. The scenery will be drawn using a css canvas. I will use javascript functionality to track the player's movement, the location of the terrain, and the player's manipulation of the terrain. 
 
-##3. MVP
+## 3. MVP
 Upon loading the page, a randomly spawned terrain will load. There will be dirt blocks on top of stone blocks. The dirt blocks on top rows will have a grassy texture. The user will be able to manipulate a player character using the arrow keys, WASD, or a gui interface next to the screen (to make accessible for mobile). The user will be able to pick up dirt blocks by clicking on them when the player character is next to them. Then, the block appears in the character's hand, and they can place the dirt block somewhere else. The stone blocks cannot be picked up. 
 
-##4. Stretch Goals
+## 4. Stretch Goals
 - Create a tutorial sequence that explains how to play the game.
 - Add an inventory GUI for players to keep multiple items in their inventory.
 - Add randomly spawning trees. The player can destroy trees and pick up the wood. 
