@@ -1,0 +1,76 @@
+body {
+    margin: 0 auto;
+    font-family: 'Cambay', sans-serif;
+    background: rgb(39, 21, 14);
+    color: white;
+}
+#container {
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+}
+#title {
+    flex-direction: column;
+    color: rgb(238, 173, 88);
+}
+#title img {
+    height: 50px;
+}
+h1 {
+    font-family: 'Sigmar One', cursive;
+    display: inline;
+}
+#title p {
+    display: inline;
+}
+#inventory {
+    height: 50px;
+    display: flex;
+    background-color: rgb(209, 121, 38);
+    border-radius: 10px 10px 0 0;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+#game-bg{
+    background-color: rgb(125, 205, 236);
+}
+#game {
+    height: 280px;
+    width: 800px;
+    background: url(../img/grass.png);
+    background-repeat: repeat-x;
+}
+#menubar {
+    height: 50px;
+    display: flex;
+    background-color: rgb(209, 121, 38);
+    border-radius: 0 0 10px 10px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+button {
+    border-radius: 10px;
+    height: 45px;
+}
+#arrow-keys button {
+    width: 45px;
+}
+#jump {
+    width: 90px;
+}
+#objective {
+    width: 90px;
+}
+#popup {
+    visibility: hidden;
+    position: absolute;
+    width: 250px;
+    top: 150px;
+    border-radius: 10px;
+    background: white;
+    color: black;
+    padding: 10px;
+}

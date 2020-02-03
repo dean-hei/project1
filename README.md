@@ -14,7 +14,7 @@ Upon loading the page, a randomly spawned terrain will load. There will be dirt 
 
 - Make the design prettier. Add a parallax background. Make a day and night function so that the scenery changes from day to night.
 - The gameworld will be expanded beyond the width of the screen. A minimap will be added so the user can know where they are. 
-- 
+
 
 ## Wireframe
 
