@@ -45,20 +45,24 @@ function newTerrain() {
     // draw random layer of stone: draw three hills
     for (let i = 0; i < 3; i++) {
         hill = 4 + Math.floor(Math.random() * 4);
-        leftBank = Math.floor(Math.random() * 10) + i*7;
-        console.log(hill, "at", leftBank);
-        for(let j = leftBank; j < hill; j++) {
-            console.log("index", j, gameBoard[j][gameBoard[j].length-2]);
-            if(gameBoard[j][gameBoard[j].length-3] == "") {
+        leftBank = Math.floor(Math.random() * 10) + i*10;
+        for (let j = leftBank; j < leftBank + hill; j++) {
+            console.log("index", j, gameBoard[j]);
+            if(gameBoard[j][gameBoard[j].length-3] != "stone") {
                 renderBlock(stoneDesc, j*20, game.height-60);
+                gameBoard[j][gameBoard[j].length-3] = "stone";
             }
         }
     }
-    // console.log(gameBoard);
-
+    
     // DRAW MUD
     // draw 2 blocks of mud on top of every stone block
+    for (let i = 0; i < gameBoard.length; i++) {
+        
+    }
     
+    // console.log(gameBoard);
+
     // DRAW LEAVES
     // draw leaves somewhere on top of mud
 }
