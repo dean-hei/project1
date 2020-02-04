@@ -35,12 +35,14 @@ h1 {
 }
 #game-bg{
     background-color: rgb(125, 205, 236);
+    height: 280px;
 }
 #game {
     height: 280px;
     width: 800px;
     background: url(../img/grass.png);
     background-repeat: repeat-x;
+    background-size: 115px 301px;
 }
 #menubar {
     height: 50px;
