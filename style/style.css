@@ -57,11 +57,8 @@ button {
     border-radius: 10px;
     height: 45px;
 }
-#arrow-keys button {
+.arrow-keys button {
     width: 45px;
-}
-#jump {
-    width: 90px;
 }
 #objective {
     width: 90px;
