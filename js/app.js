@@ -44,6 +44,7 @@ function Creature(x, y, color, width, height) {
     this.velY = 0;
     this.jumping = false;
     this.grounded = false;
+    this.facing = "right";
     this.render = function() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -166,7 +167,7 @@ findCollisionObjects();
 function findCollisionObjects() {
     for (let i = 0; i < gameBoard.length; i++) {
         for (let j = 0; j < gameBoard[0].length; j++) {
-            if (gameBoard[i][j] != undefined && gameBoard[i][j] != "leaf") {
+            if (gameBoard[i][j] != undefined && gameBoard[i][j] != "sw" && gameBoard[i][j] != "leaf") {
                 collisionObjects.push({
                     x: i*20,
                     y: j*20,
@@ -222,18 +223,21 @@ function hop(speed) {
     }
 }
 
+// handles movement when user presses a key
 function keyboardHandler(e) {
     switch(e.keyCode) {
         case (68): // d right
             if (frog.velX < frog.speed) {
                 frog.velX+=10;
                 hop(2);
+                frog.facing = "right";
             }
             break;
         case (65): // a left
             if (frog.velX > -frog.speed) {
                 frog.velX-=10;
                 hop(2);
+                frog.facing = "left";
             }
             break;
         case (87): // w up
@@ -244,26 +248,91 @@ function keyboardHandler(e) {
     }
 }
 
+// handles movement on the button gui
 function buttonHandler(e) {
     switch(e.target.id) {
-        case ("right"): // d right
+        case ("right"): // right
             if (frog.velX < frog.speed) {
                 frog.velX+=10;
                 hop(2);
             }
+            frog.facing = "right";
             break;
-        case ("left"): // a left
+        case ("left"): // left
             if (frog.velX > -frog.speed) {
                 frog.velX-=10;
                 hop(2);
             }
+            frog.facing = "left";
             break;
-        case ("up"): // w up
+        case ("up"): // up
             hop(4);
             break;
-        case ("down"): // s
+        case ("down"): // down
             //place block;
     }
+}
+
+function checkTongueCollison(x1, y1, x2, y2){
+    let hitCoords = {
+        x: x2, 
+        y: y2,
+    };
+    let xSign = 1;
+    let ySign = 1;
+    if (x2-x1 < 0) {
+        xSign = -1;
+    }
+    if (y2-y1 < 0) {
+        ySign = -1;
+    }
+    console.log("x:", x1, "to", x2, xSign);
+    console.log("y:", y1, "to", y2, ySign); 
+    let j = y1;
+    for (let i = x1; i < Math.abs(x2); i+= xSign) {
+        j+= ySign;
+        let gameBoardX = Math.floor(i/20);
+        let gameBoardY = Math.floor(j/20);
+        let blockFound = gameBoard[gameBoardX][gameBoardY];
+        if (blockFound) {
+            hitCoords.x = gameBoardX;
+            hitCoords.y = gameBoardY;
+            // remove from gameBoard
+            gameBoard[gameBoardX][gameBoardY] = "";
+            // re-populate collision objects list
+            collisionObjects = [];
+            findCollisionObjects();
+            return  hitCoords;
+        } 
+    }
+    return hitCoords;
+    
+}
+
+// draws a line when user clicks
+function tongue(e) {
+    // get mouse position from event listener
+    let canvasBoundaries = game.getBoundingClientRect();
+    let mouseX = e.clientX - canvasBoundaries.left;
+    let mouseY = e.clientY - canvasBoundaries.top;
+    let startX = frog.x;
+    // determine start point
+    let startY = frog.y + frog.height/2;
+    if (frog.facing == "right") { // draw tongue starting on right side of frog
+        startX = frog.x + frog.width;
+    } 
+    // check if object in range
+    let hitCoords = checkTongueCollison(startX, startY, mouseX, mouseY);
+    // if object in range, pick up and put in inventory
+    // if tongue touches fly: kill fly
+    console.log(hitCoords);
+    
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(hitCoords.x*20, hitCoords.y*20);
+    ctx.strokeStyle = "hotpink";
+    ctx.lineWidth = 3;
+    ctx.stroke();
 }
 
 function gameLoop() {
@@ -308,7 +377,6 @@ function gameLoop() {
 
     // draw frog
     frog.render();
-    // console.log(frog.x, frog.y);
     // draw fly
     if (fly.alive) {
         fly.x += 3;
@@ -326,5 +394,6 @@ let buttons = document.querySelectorAll("button");
 for (button of buttons) {
     button.addEventListener("click", buttonHandler);
 }
+game.addEventListener("click", tongue);
 let runGame = setInterval(gameLoop, 60);
 console.log(frog);
