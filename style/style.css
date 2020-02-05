@@ -24,7 +24,7 @@ h1 {
 #title p {
     display: inline;
 }
-#inventory {
+#top-menu {
     height: 50px;
     display: flex;
     background-color: rgb(209, 121, 38);

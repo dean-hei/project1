@@ -2,9 +2,10 @@
 // http://www.somethinghitme.com/2013/01/09/creating-a-canvas-platformer-tutorial-part-one/
 
 
-// DOM References for canvas
+// DOM References
 let game = document.getElementById("game");
 let ctx = game.getContext("2d");
+let message = document.getElementById("message");
 
 
 // Set game canvas width and height
@@ -18,7 +19,6 @@ for (let i=0; i < gameBoard.length; i++) {
     // gameBoard[i] = gameBoard[i].map(function(item) {
     //     return "";
     // });
-    console.log(gameBoard[i][0]);
 }
 
 // define things to draw blocks
@@ -157,14 +157,13 @@ function renderTerrain() {
 newTerrain();
 let frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
 let fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
-let friction = 0.8;
+let friction = 0.8
 let gravity = 0.8;
 let collisionObjects = [];
 findCollisionObjects();
 
 // puts all the collision blocks into the array
 function findCollisionObjects() {
-    console.log(gameBoard[0][0]);
     for (let i = 0; i < gameBoard.length; i++) {
         for (let j = 0; j < gameBoard[0].length; j++) {
             if (gameBoard[i][j] != undefined && gameBoard[i][j] != "leaf") {
@@ -200,7 +199,7 @@ function colCheck(shapeA, shapeB) {
                 shapeA.y += oY;
             } else {
                 colDir = "b";
-                shapeA.y -= oY;
+                shapeA.y -= 2*oY;
             }
         } else {
             if (vX > 0) {
@@ -223,7 +222,7 @@ function hop(speed) {
     }
 }
 
-function movementHandler(e) {
+function keyboardHandler(e) {
     switch(e.keyCode) {
         case (68): // d right
             if (frog.velX < frog.speed) {
@@ -244,6 +243,29 @@ function movementHandler(e) {
             //place block;
     }
 }
+
+function buttonHandler(e) {
+    switch(e.target.id) {
+        case ("right"): // d right
+            if (frog.velX < frog.speed) {
+                frog.velX+=10;
+                hop(2);
+            }
+            break;
+        case ("left"): // a left
+            if (frog.velX > -frog.speed) {
+                frog.velX-=10;
+                hop(2);
+            }
+            break;
+        case ("up"): // w up
+            hop(4);
+            break;
+        case ("down"): // s
+            //place block;
+    }
+}
+
 function gameLoop() {
     // set frog physics
     frog.velX *= friction;
@@ -286,7 +308,7 @@ function gameLoop() {
 
     // draw frog
     frog.render();
-    console.log(frog.x, frog.y);
+    // console.log(frog.x, frog.y);
     // draw fly
     if (fly.alive) {
         fly.x += 3;
@@ -299,6 +321,10 @@ function gameLoop() {
     renderTerrain();
 }
 
-document.addEventListener("keydown", movementHandler);
+document.addEventListener("keydown", keyboardHandler);
+let buttons = document.querySelectorAll("button");
+for (button of buttons) {
+    button.addEventListener("click", buttonHandler);
+}
 let runGame = setInterval(gameLoop, 60);
 console.log(frog);
