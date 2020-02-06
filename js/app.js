@@ -16,10 +16,11 @@ game.setAttribute("height", getComputedStyle(game).height); // height=800
 let gameBoard = new Array(game.width/20);
 for (let i=0; i < gameBoard.length; i++) {
     gameBoard[i] = new Array(game.height/20);
-    // gameBoard[i] = gameBoard[i].map(function(item) {
-    //     return "";
-    // });
+    // for (let j=0; j < gameBoard[i].length; j++) {
+    //     gameBoard[i][j] = '';
+    // }
 }
+console.log(gameBoard);
 
 // define things to draw blocks
 function renderBlock(color, x, y) {
@@ -273,11 +274,12 @@ function buttonHandler(e) {
     }
 }
 
-function checkTongueCollison(x1, y1, x2, y2){
-    let hitCoords = {
+function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
+    let tongueEnd = {
         x: x2, 
         y: y2,
     };
+    // let slope = 
     let xSign = 1;
     let ySign = 1;
     if (x2-x1 < 0) {
@@ -286,26 +288,28 @@ function checkTongueCollison(x1, y1, x2, y2){
     if (y2-y1 < 0) {
         ySign = -1;
     }
-    console.log("x:", x1, "to", x2, xSign);
-    console.log("y:", y1, "to", y2, ySign); 
     let j = y1;
     for (let i = x1; i < Math.abs(x2); i+= xSign) {
-        j+= ySign;
+        // console.log ("checking", i, j);
         let gameBoardX = Math.floor(i/20);
         let gameBoardY = Math.floor(j/20);
         let blockFound = gameBoard[gameBoardX][gameBoardY];
-        if (blockFound) {
-            hitCoords.x = gameBoardX;
-            hitCoords.y = gameBoardY;
+        if (blockFound != "" && blockFound != undefined) {
+            tongueEnd.x = gameBoardX*20;
+            tongueEnd.y = gameBoardY*20;
+            console.log(blockFound, "at");
+            console.log(tongueEnd);
             // remove from gameBoard
-            gameBoard[gameBoardX][gameBoardY] = "";
+            delete gameBoard[gameBoardX][gameBoardY];
+            console.log(gameBoard[gameBoardX]);
             // re-populate collision objects list
             collisionObjects = [];
             findCollisionObjects();
-            return  hitCoords;
+            return tongueEnd;
         } 
+        j+= ySign;
     }
-    return hitCoords;
+    return tongueEnd;
     
 }
 
@@ -313,8 +317,10 @@ function checkTongueCollison(x1, y1, x2, y2){
 function tongue(e) {
     // get mouse position from event listener
     let canvasBoundaries = game.getBoundingClientRect();
-    let mouseX = e.clientX - canvasBoundaries.left;
-    let mouseY = e.clientY - canvasBoundaries.top;
+    // let mouseX = e.clientX - canvasBoundaries.left;
+    let mouseX = e.offsetX
+    // let mouseY = e.clientY - canvasBoundaries.top;
+    let mouseY = e.offsetY;
     let startX = frog.x;
     // determine start point
     let startY = frog.y + frog.height/2;
@@ -322,14 +328,19 @@ function tongue(e) {
         startX = frog.x + frog.width;
     } 
     // check if object in range
-    let hitCoords = checkTongueCollison(startX, startY, mouseX, mouseY);
+    let hit = checkTongueCollison(startX, startY, mouseX, mouseY);
     // if object in range, pick up and put in inventory
     // if tongue touches fly: kill fly
-    console.log(hitCoords);
+    if (hit.x > fly.x && hit.x < fly.x+fly.width
+        && hit.y > fly.y && hit.y < fly.y+fly.height) {
+            fly.alive = false;
+            message.innerText = "Mmm! That fly was tasty!"
+        }
     
+    // draw the line
     ctx.beginPath();
     ctx.moveTo(startX, startY);
-    ctx.lineTo(hitCoords.x*20, hitCoords.y*20);
+    ctx.lineTo(hit.x, hit.y);
     ctx.strokeStyle = "hotpink";
     ctx.lineWidth = 3;
     ctx.stroke();
@@ -396,4 +407,3 @@ for (button of buttons) {
 }
 game.addEventListener("click", tongue);
 let runGame = setInterval(gameLoop, 60);
-console.log(frog);
