@@ -20,7 +20,6 @@ for (let i=0; i < gameBoard.length; i++) {
     //     gameBoard[i][j] = '';
     // }
 }
-console.log(gameBoard);
 
 // define things to draw blocks
 function renderBlock(color, x, y) {
@@ -52,6 +51,7 @@ function Creature(x, y, color, width, height) {
     }
 }
 
+// initialize new terrain randomly
 function newTerrain() {
     // DRAW TREASURE CHEST
     let treasureX = Math.floor(Math.random()*game.width/20)*20;
@@ -133,6 +133,7 @@ function newTerrain() {
     }
 }
 
+// render pre-existing terrain
 function renderTerrain() {
     // loop through all the spaces in gameBoard to render each 
     // type of block
@@ -168,7 +169,7 @@ findCollisionObjects();
 function findCollisionObjects() {
     for (let i = 0; i < gameBoard.length; i++) {
         for (let j = 0; j < gameBoard[0].length; j++) {
-            if (gameBoard[i][j] != undefined && gameBoard[i][j] != "sw" && gameBoard[i][j] != "leaf") {
+            if (gameBoard[i][j] != undefined && gameBoard[i][j] != "" && gameBoard[i][j] != "leaf") {
                 collisionObjects.push({
                     x: i*20,
                     y: j*20,
@@ -216,6 +217,7 @@ function colCheck(shapeA, shapeB) {
     return colDir;
 }
 
+// helper function to move the frog up at the desired speed
 function hop(speed) {
     if(!frog.jumping) {
         frog.velY = -frog.speed*speed;
@@ -275,11 +277,13 @@ function buttonHandler(e) {
 }
 
 function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
+    // initialize the end of the tongue to the cursor
     let tongueEnd = {
         x: x2, 
         y: y2,
     };
-    // let slope = 
+    // figure out which direction we need to increment
+    let slope = Math.abs((y2 - y1)/(x2-x1));
     let xSign = 1;
     let ySign = 1;
     if (x2-x1 < 0) {
@@ -288,27 +292,35 @@ function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
     if (y2-y1 < 0) {
         ySign = -1;
     }
-    let j = y1;
-    for (let i = x1; i < Math.abs(x2); i+= xSign) {
-        // console.log ("checking", i, j);
-        let gameBoardX = Math.floor(i/20);
-        let gameBoardY = Math.floor(j/20);
+    console.log(slope, "xSign", xSign, "ySign", ySign);
+    console.log("cursor at", x2, y2);
+    // iterate along the line and check if there's a block at that coordinate
+    for (let i = 0; i < Math.abs(x2-x1); i++) {
+        // find the coresponding spot on the gameboard
+        let gameBoardX = Math.round(x1/20);
+        let gameBoardY = Math.round(y1/20);
         let blockFound = gameBoard[gameBoardX][gameBoardY];
-        if (blockFound != "" && blockFound != undefined) {
+        console.log(gameBoard[gameBoardX]);
+        // check if theres a block there
+        if (blockFound){
+            // have the tongue stop at the block
             tongueEnd.x = gameBoardX*20;
             tongueEnd.y = gameBoardY*20;
             console.log(blockFound, "at");
             console.log(tongueEnd);
-            // remove from gameBoard
+            // remove block from gameBoard
             delete gameBoard[gameBoardX][gameBoardY];
-            console.log(gameBoard[gameBoardX]);
-            // re-populate collision objects list
+            // re-populate collision objects list from updated gameboard
             collisionObjects = [];
             findCollisionObjects();
             return tongueEnd;
         } 
-        j+= ySign;
+        // move the starting point along the line
+        // console.log("nothing at", x1, y1)
+        x1 += xSign;
+        y1 += ySign*slope;
     }
+
     return tongueEnd;
     
 }
@@ -317,10 +329,12 @@ function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
 function tongue(e) {
     // get mouse position from event listener
     let canvasBoundaries = game.getBoundingClientRect();
-    // let mouseX = e.clientX - canvasBoundaries.left;
-    let mouseX = e.offsetX
-    // let mouseY = e.clientY - canvasBoundaries.top;
-    let mouseY = e.offsetY;
+    let mouseX = e.clientX - canvasBoundaries.left;
+    // let mouseX = e.offsetX
+    console.log(e.offsetX);
+    console.log(e.clientX);
+    let mouseY = e.clientY - canvasBoundaries.top;
+    // let mouseY = e.offsetY;
     let startX = frog.x;
     // determine start point
     let startY = frog.y + frog.height/2;
@@ -346,6 +360,7 @@ function tongue(e) {
     ctx.stroke();
 }
 
+// things that happen every frame
 function gameLoop() {
     // set frog physics
     frog.velX *= friction;
@@ -400,10 +415,13 @@ function gameLoop() {
     renderTerrain();
 }
 
+// add event listeners to the features of the page
 document.addEventListener("keydown", keyboardHandler);
 let buttons = document.querySelectorAll("button");
 for (button of buttons) {
     button.addEventListener("click", buttonHandler);
 }
 game.addEventListener("click", tongue);
+
+// run the game
 let runGame = setInterval(gameLoop, 60);
