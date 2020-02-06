@@ -6,20 +6,30 @@
 let game = document.getElementById("game");
 let ctx = game.getContext("2d");
 let message = document.getElementById("message");
+let inventoryGUI = document.getElementById("inventory");
+let popup = document.getElementById("popup");
+let popupText = document.getElementById("popupText");
+let continueButton = document.getElementById("continue");
+let restartButton = document.getElementById("restart");
+
 
 
 // Set game canvas width and height
 game.setAttribute("width", getComputedStyle(game).width); // width=280
 game.setAttribute("height", getComputedStyle(game).height); // height=800
 
+var gameBoard = [];
 // creates an array to represent a gameboard that is 800/20=40 blocks wide
-let gameBoard = new Array(game.width/20);
-for (let i=0; i < gameBoard.length; i++) {
-    gameBoard[i] = new Array(game.height/20);
-    // for (let j=0; j < gameBoard[i].length; j++) {
-    //     gameBoard[i][j] = '';
-    // }
+function clearBoard() {
+    gameBoard = new Array(game.width/20);
+    for (let i=0; i < gameBoard.length; i++) {
+        gameBoard[i] = new Array(game.height/20);
+        // for (let j=0; j < gameBoard[i].length; j++) {
+        //     gameBoard[i][j] = '';
+        // }
+    }
 }
+clearBoard();
 
 // define things to draw blocks
 function renderBlock(color, x, y) {
@@ -157,13 +167,34 @@ function renderTerrain() {
 }
 
 // initialize the terrain, creatures, and physics
+
 newTerrain();
-let frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
-let fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
-let friction = 0.8
-let gravity = 0.8;
-let collisionObjects = [];
+var frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
+var fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
+var friction = 0.8
+var gravity = 0.8;
+var collisionObjects = [];
 findCollisionObjects();
+var inventory = {};
+
+// hides all parts of popup window
+function hidePopup() {
+    popup.style.visibility = "hidden";
+    continueButton.style.visibility = "hidden";
+    restartButton.style.visibility = "hidden";
+}
+
+// starts new game without refreshing page
+function gameInit() {
+    clearBoard();
+    newTerrain();
+    frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
+    fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
+    collisionObjects = [];
+    findCollisionObjects();
+    inventory = {};
+    hidePopup();
+}
 
 // puts all the collision blocks into the array
 function findCollisionObjects() {
@@ -276,6 +307,37 @@ function buttonHandler(e) {
     }
 }
 
+// add something to inventory based on its coords in the grid
+function inventoryAdd(x, y){
+    if (gameBoard[x][y]) {
+        let type = gameBoard[x][y];
+        // check if that type of block is not already in inventory
+        if (!inventory[type]) {
+            inventory[type] = 0;
+            // add a new space on the gui
+            let invSlot = document.createElement("div");
+            invSlot.classList.add(type)
+            inventoryGUI.appendChild(invSlot);
+        }
+        inventory[type]++;
+        // update the gui
+        document.querySelector(`.${type}`).innerText = inventory[type] + " " + type;
+        // give text feedback
+        message.innerText = "Picked up " + type + "!";
+        // check if won game 
+        if (type == "treasure") {
+            popupText.innerText = "You found the treasure! You win!"
+            restartButton.style.visibility = "visible";
+            popup.style.visibility = "visible";
+        }
+        // remove block from gameBoard
+        delete gameBoard[x][y];
+        // re-populate collision objects list from updated gameboard
+        collisionObjects = [];
+        findCollisionObjects();
+    }
+}
+
 function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
     // initialize the end of the tongue to the cursor
     let tongueEnd = {
@@ -292,15 +354,12 @@ function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
     if (y2-y1 < 0) {
         ySign = -1;
     }
-    console.log(slope, "xSign", xSign, "ySign", ySign);
-    console.log("cursor at", x2, y2);
     // iterate along the line and check if there's a block at that coordinate
     for (let i = 0; i < Math.abs(x2-x1); i++) {
         // find the coresponding spot on the gameboard
         let gameBoardX = Math.round(x1/20);
         let gameBoardY = Math.round(y1/20);
         let blockFound = gameBoard[gameBoardX][gameBoardY];
-        console.log(gameBoard[gameBoardX]);
         // check if theres a block there
         if (blockFound){
             // have the tongue stop at the block
@@ -308,19 +367,18 @@ function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
             tongueEnd.y = gameBoardY*20;
             console.log(blockFound, "at");
             console.log(tongueEnd);
-            // remove block from gameBoard
-            delete gameBoard[gameBoardX][gameBoardY];
-            // re-populate collision objects list from updated gameboard
-            collisionObjects = [];
-            findCollisionObjects();
+            // put object in inventory
+            inventoryAdd(gameBoardX, gameBoardY);
             return tongueEnd;
         } 
         // move the starting point along the line
-        // console.log("nothing at", x1, y1)
         x1 += xSign;
         y1 += ySign*slope;
     }
-
+    // check to make sure block at mouse pointer is  match
+    finalX = Math.floor(x2/20);
+    finalY = Math.floor(y2/20);
+    inventoryAdd(finalX, finalY);
     return tongueEnd;
     
 }
@@ -331,8 +389,6 @@ function tongue(e) {
     let canvasBoundaries = game.getBoundingClientRect();
     let mouseX = e.clientX - canvasBoundaries.left;
     // let mouseX = e.offsetX
-    console.log(e.offsetX);
-    console.log(e.clientX);
     let mouseY = e.clientY - canvasBoundaries.top;
     // let mouseY = e.offsetY;
     let startX = frog.x;
@@ -343,7 +399,6 @@ function tongue(e) {
     } 
     // check if object in range
     let hit = checkTongueCollison(startX, startY, mouseX, mouseY);
-    // if object in range, pick up and put in inventory
     // if tongue touches fly: kill fly
     if (hit.x > fly.x && hit.x < fly.x+fly.width
         && hit.y > fly.y && hit.y < fly.y+fly.height) {
@@ -422,6 +477,13 @@ for (button of buttons) {
     button.addEventListener("click", buttonHandler);
 }
 game.addEventListener("click", tongue);
+continueButton.addEventListener("click", function(e){
+    hidePopup();    
+});
+restartButton.addEventListener("click", function(e){
+    gameInit();
+});
+
 
 // run the game
 let runGame = setInterval(gameLoop, 60);

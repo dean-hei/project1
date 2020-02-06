@@ -46,12 +46,20 @@ h1 {
 }
 #menubar {
     height: 50px;
-    display: flex;
     background-color: rgb(209, 121, 38);
     border-radius: 0 0 10px 10px;
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+#inventory {
+    display: flex;
+    flex-direction: row;
+}
+#inventory div {
+    width: 100px;
+    text-align: center;
 }
 button {
     border-radius: 10px;
