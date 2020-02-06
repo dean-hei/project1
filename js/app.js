@@ -11,6 +11,7 @@ let popup = document.getElementById("popup");
 let popupText = document.getElementById("popupText");
 let continueButton = document.getElementById("continue");
 let restartButton = document.getElementById("restart");
+let objective = document.getElementById("objective");
 
 
 
@@ -176,13 +177,7 @@ var gravity = 0.8;
 var collisionObjects = [];
 findCollisionObjects();
 var inventory = {};
-
-// hides all parts of popup window
-function hidePopup() {
-    popup.style.visibility = "hidden";
-    continueButton.style.visibility = "hidden";
-    restartButton.style.visibility = "hidden";
-}
+var invSelected = "none";
 
 // starts new game without refreshing page
 function gameInit() {
@@ -190,14 +185,18 @@ function gameInit() {
     newTerrain();
     frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
     fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
-    collisionObjects = [];
     findCollisionObjects();
     inventory = {};
-    hidePopup();
+    invSelected = "none";
+    popup.style.visibility = "hidden";
+    continueButton.style.visibility = "hidden";
+    restartButton.style.visibility = "hidden";
+    inventoryGUI.innerHTML = "";
 }
 
 // puts all the collision blocks into the array
 function findCollisionObjects() {
+    collisionObjects = [];
     for (let i = 0; i < gameBoard.length; i++) {
         for (let j = 0; j < gameBoard[0].length; j++) {
             if (gameBoard[i][j] != undefined && gameBoard[i][j] != "" && gameBoard[i][j] != "leaf") {
@@ -277,8 +276,6 @@ function keyboardHandler(e) {
         case (87): // w up
             hop(4);
             break;
-        case (83): // s
-            //place block;
     }
 }
 
@@ -302,12 +299,10 @@ function buttonHandler(e) {
         case ("up"): // up
             hop(4);
             break;
-        case ("down"): // down
-            //place block;
     }
 }
 
-// add something to inventory based on its coords in the grid
+// add something to inventory based on its coords in the grid, checks win
 function inventoryAdd(x, y){
     if (gameBoard[x][y]) {
         let type = gameBoard[x][y];
@@ -318,6 +313,7 @@ function inventoryAdd(x, y){
             let invSlot = document.createElement("div");
             invSlot.classList.add(type)
             inventoryGUI.appendChild(invSlot);
+            invSlot.addEventListener("click", selectInventory);
         }
         inventory[type]++;
         // update the gui
@@ -329,15 +325,28 @@ function inventoryAdd(x, y){
             popupText.innerText = "You found the treasure! You win!"
             restartButton.style.visibility = "visible";
             popup.style.visibility = "visible";
+            continueButton.style.visibility = "visible";
         }
         // remove block from gameBoard
         delete gameBoard[x][y];
         // re-populate collision objects list from updated gameboard
-        collisionObjects = [];
         findCollisionObjects();
     }
 }
 
+// updates the inventory GUI when an item is selected
+function selectInventory(e){
+    // remove border from previous selected item
+    if (invSelected != "none") {
+        console.log(document.getElementsByClassName(invSelected));
+        document.getElementsByClassName(invSelected)[0].style.border = "0";
+    }
+    // update to what they clicked
+    invSelected = e.target.classList[0];
+    e.target.style.border = "2px solid rgb(39, 21, 14)";
+}
+
+// checks if tongue hits a block and returns those coordinates, adds block to inventory
 function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
     // initialize the end of the tongue to the cursor
     let tongueEnd = {
@@ -387,32 +396,69 @@ function checkTongueCollison(x1, y1, x2, y2){ // pass in coords as pixels
 function tongue(e) {
     // get mouse position from event listener
     let canvasBoundaries = game.getBoundingClientRect();
-    let mouseX = e.clientX - canvasBoundaries.left;
-    // let mouseX = e.offsetX
-    let mouseY = e.clientY - canvasBoundaries.top;
-    // let mouseY = e.offsetY;
-    let startX = frog.x;
+    // let mouseX = e.clientX - canvasBoundaries.left;
+    let mouseX = e.offsetX;
+    // let mouseY = e.clientY - canvasBoundaries.top;
+    let mouseY = e.offsetY;
+    // check if object in range
     // determine start point
+    let startX = frog.x;
     let startY = frog.y + frog.height/2;
     if (frog.facing == "right") { // draw tongue starting on right side of frog
         startX = frog.x + frog.width;
     } 
-    // check if object in range
     let hit = checkTongueCollison(startX, startY, mouseX, mouseY);
     // if tongue touches fly: kill fly
     if (hit.x > fly.x && hit.x < fly.x+fly.width
         && hit.y > fly.y && hit.y < fly.y+fly.height) {
             fly.alive = false;
             message.innerText = "Mmm! That fly was tasty!"
-        }
-    
+    }
+    drawTongue(hit.x, hit.y);
+}
+
+// draw tongue from frog to specified point
+function drawTongue(finalX, finalY){
+    // determine start point
+    let startX = frog.x;
+    let startY = frog.y + frog.height/2;
+    if (frog.facing == "right") { // draw tongue starting on right side of frog
+        startX = frog.x + frog.width;
+    } 
     // draw the line
     ctx.beginPath();
     ctx.moveTo(startX, startY);
-    ctx.lineTo(hit.x, hit.y);
+    ctx.lineTo(finalX+10, finalY+10); // the +10 moves it to the center of the block
     ctx.strokeStyle = "hotpink";
     ctx.lineWidth = 3;
     ctx.stroke();
+}
+
+// place a block from inventory where the user clicks
+function placeBlock(e) {
+    let placeX = Math.floor(e.offsetX/20);
+    let placeY = Math.floor(e.offsetY/20);
+    // place selected block at that coordinate
+    // check there isn't already a block there
+    if (!gameBoard[placeX][placeY]) {
+        // add to gameboard
+        gameBoard[placeX][placeY] = invSelected;
+        // draw tongue 
+        drawTongue(placeX*20, placeY*20);
+        // remove from inventory
+        inventory[invSelected]--
+        // update number on GUI
+        let invSlot = document.getElementsByClassName(invSelected)[0];
+        invSlot.innerText = inventory[invSelected] + " " + invSelected;
+        // remove key if it was the last one
+        if (inventory[invSelected] == 0) {
+            delete inventory[invSelected];
+            inventoryGUI.removeChild(invSlot);
+            invSelected = "none";
+        }
+        // update collision objects
+        findCollisionObjects();
+    }
 }
 
 // things that happen every frame
@@ -468,6 +514,14 @@ function gameLoop() {
     }
     // render terrain
     renderTerrain();
+
+    // if inv selected, place block instead of tongue
+    if (invSelected != "none") {
+        game.removeEventListener("click", tongue);
+        game.addEventListener("click", placeBlock)
+    } else {
+        game.addEventListener("click", tongue);
+    }
 }
 
 // add event listeners to the features of the page
@@ -478,10 +532,18 @@ for (button of buttons) {
 }
 game.addEventListener("click", tongue);
 continueButton.addEventListener("click", function(e){
-    hidePopup();    
+    popup.style.visibility = "hidden";
+    continueButton.style.visibility = "hidden";
+    restartButton.style.visibility = "hidden"; 
 });
 restartButton.addEventListener("click", function(e){
     gameInit();
+});
+objective.addEventListener("click", function(e){
+    popupText.innerText = "Find the treasure!";
+    popup.style.visibility = "visible";
+    continueButton.style.visibility = "visible";
+    restartButton.style.visibility = "hidden";
 });
 
 

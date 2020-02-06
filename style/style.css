@@ -60,6 +60,10 @@ h1 {
 #inventory div {
     width: 100px;
     text-align: center;
+    padding: 10px;
+}
+#inventory div:hover {
+    border: 1px solid rgb(200, 255, 0);
 }
 button {
     border-radius: 10px;
@@ -67,6 +71,9 @@ button {
 }
 .arrow-keys button {
     width: 45px;
+}
+#up {
+    width: 90px;
 }
 #objective {
     width: 90px;
