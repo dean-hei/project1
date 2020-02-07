@@ -13,8 +13,6 @@ let continueButton = document.getElementById("continue");
 let restartButton = document.getElementById("restart");
 let objective = document.getElementById("objective");
 
-
-
 // Set game canvas width and height
 game.setAttribute("width", getComputedStyle(game).width); // width=280
 game.setAttribute("height", getComputedStyle(game).height); // height=800
@@ -32,21 +30,22 @@ function clearBoard() {
 }
 clearBoard();
 
-// define things to draw blocks
+// helperfunciton to draw blocks
 function renderBlock(color, x, y) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, 20, 20);
 }
+
 let treasureDesc = "red";
 let stoneDesc = "gray";
 let mudDesc = "sienna";
 let leafDesc = "lime";
 
 // define things to render creatures
-function Creature(x, y, color, width, height) {
+function Creature(x, y, color, width, height, src) {
     this.x = x;
     this.y = y;
-    this.color = color;
+    this.color = color; 
     this.width = width;
     this.height = height;
     this.alive = true;
@@ -56,9 +55,22 @@ function Creature(x, y, color, width, height) {
     this.jumping = false;
     this.grounded = false;
     this.facing = "right";
+    this.image = new Image();
+    if (src) {
+        this.image.src = src;
+    }
     this.render = function() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        // ctx.fillStyle = this.color;
+        // ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.image.src){
+            if (this.facing == "left") {
+                this.image.src = "img/frogLeft.png";
+            } else {
+                this.image.src = src;
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.drawImage(this.image, this.x-10, this.y-10, this.width+20, this.height+20);
+        }
     }
 }
 
@@ -146,22 +158,44 @@ function newTerrain() {
 
 // render pre-existing terrain
 function renderTerrain() {
+    // void ctx.drawImage(image, dx, dy, dWidth, dHeight);
+    // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
     // loop through all the spaces in gameBoard to render each 
     // type of block
     for (let i = 0; i < gameBoard.length; i++) {
         for (let j = 0; j < gameBoard[i].length; j++) {
+            let blockImg = new Image();
+            blockImg.src = "img/bgtextures.png"
+            ctx.imageSmoothingEnabled = false;
             switch (gameBoard[i][j]) {
                 case ("treasure"):
-                    renderBlock(treasureDesc, i*20, j*20);
+                    ctx.drawImage(blockImg, 12, 0, 5, 5, i*20, j*20, 20, 20);
                     break;
                 case ("stone"):
-                    renderBlock(stoneDesc, i*20, j*20);
+                    ctx.drawImage(blockImg, 4, 0, 4, 4, i*20, j*20, 20, 20);
                     break;
                 case ("mud"):
-                    renderBlock(mudDesc, i*20, j*20);
+                    ctx.drawImage(blockImg, 0, 0, 4, 4, i*20, j*20, 20, 20);
                     break;
                 case ("leaf"):
-                    renderBlock(leafDesc, i*20, j*20);
+                    if (j < gameBoard[i].length - 6) {
+                        for (let k=0; k<6; k++) {
+                            if (gameBoard[i][j+k] != "leaf") {
+                                ctx.drawImage(blockImg, 8, 0, 4, 4, i*20, j*20, 20, 20);
+                                k = 6;
+                            }
+                            // draw tall leaf if there are six in a row
+                            if (k == 5) {
+                                blockImg.src = "img/leaf2.png"
+                                ctx.drawImage(blockImg, i*20-10, j*20-10, 40, 140);
+                                j += 5;
+                            }
+                        }
+                    } else {
+                    ctx.drawImage(blockImg, 8, 0, 4, 4, i*20, j*20, 20, 20);
+                    // blockImg.src = "img/tool2.png";
+                    // ctx.drawImage(blockImg, i*20, j*20, 20, 20)
+                    }
             }
         }
     }
@@ -169,8 +203,8 @@ function renderTerrain() {
 
 // initialize the terrain, creatures, and physics
 newTerrain();
-var frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
-var fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
+var frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30, "img/frog1.png"); // change height to 120
+var fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20, "img/fly.png");
 var friction = 0.8
 var gravity = 0.8;
 var collisionObjects = [];
@@ -182,8 +216,8 @@ var invSelected = "none";
 function gameInit() {
     clearBoard();
     newTerrain();
-    frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
-    fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
+    frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30, "img/frog1.png"); // change height to 120
+    fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20, "img/fly.png");
     findCollisionObjects();
     inventory = {};
     invSelected = "none";
@@ -316,7 +350,8 @@ function inventoryAdd(x, y){
         }
         inventory[type]++;
         // update the gui
-        document.querySelector(`.${type}`).innerText = inventory[type] + " " + type;
+        // document.querySelector(`.${type}`).innerHTML = `<image src=img/${type}.png height="20" width="20"> x ${inventory[type]}`;
+        document.querySelector(`.${type}`).innerText = `${type} x ${inventory[type]}`;
         // give text feedback
         message.innerText = "Picked up " + type + "!";
         // check if won game 
@@ -407,10 +442,10 @@ function tongue(e) {
     let mouseY = e.offsetY;
     // check if object in range
     // determine start point
-    let startX = frog.x;
-    let startY = frog.y + frog.height/2;
+    let startX = frog.x-5;
+    let startY = frog.y+5;
     if (frog.facing == "right") { // draw tongue starting on right side of frog
-        startX = frog.x + frog.width;
+        startX = frog.x + frog.width+5;
     } 
     let hit = checkTongueCollison(startX, startY, mouseX, mouseY);
     // if tongue touches fly: kill fly
@@ -425,10 +460,10 @@ function tongue(e) {
 // draw tongue from frog to specified point
 function drawTongue(finalX, finalY){
     // determine start point
-    let startX = frog.x;
-    let startY = frog.y + frog.height/2;
+    let startX = frog.x-5;
+    let startY = frog.y+5;
     if (frog.facing == "right") { // draw tongue starting on right side of frog
-        startX = frog.x + frog.width;
+        startX = frog.x + frog.width+5;
     } 
     // draw the line
     ctx.beginPath();
@@ -456,7 +491,10 @@ function placeBlock(e) {
         inventory[invSelected]--
         // update number on GUI
         let invSlot = document.getElementsByClassName(invSelected)[0];
-        invSlot.innerText = inventory[invSelected] + " " + invSelected;
+        if (invSlot) {
+            // invSlot.innerHTML = `<image src=img/${invSelected}.png height="20" width="20"> x ${inventory[invSelected]}`;
+            invSlot.innerText = `${invSelected} x ${inventory[invSelected]}`;
+        }
         // remove key if it was the last one
         if (inventory[invSelected] == 0) {
             delete inventory[invSelected];
@@ -509,6 +547,8 @@ function gameLoop() {
         frog.jumping = false;
     }
 
+    // render terrain
+    renderTerrain();
     // draw frog
     frog.render();
     // draw fly
@@ -519,8 +559,6 @@ function gameLoop() {
         }
         fly.render();
     }
-    // render terrain
-    renderTerrain();
 
     // if inv selected, place block instead of tongue
     if (invSelected != "none") {

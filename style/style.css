@@ -4,11 +4,13 @@ body {
     background: rgb(39, 21, 14);
     color: white;
 }
+
 #container {
     width: 800px;
     display: flex;
     flex-direction: column;
     justify-items: center;
+    margin: 0 auto;
 }
 #title {
     flex-direction: column;
