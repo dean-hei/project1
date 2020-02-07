@@ -186,7 +186,11 @@ function renderTerrain() {
                             }
                             // draw tall leaf if there are six in a row
                             if (k == 5) {
-                                blockImg.src = "img/leaf2.png"
+                                if (i%2 == 0) {
+                                    blockImg.src = "img/leaf2.png"
+                                } else {
+                                    blockImg.src = "img/leaf1.png"
+                                }
                                 ctx.drawImage(blockImg, i*20-10, j*20-10, 40, 140);
                                 j += 5;
                             }
