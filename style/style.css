@@ -78,6 +78,13 @@ button {
 #objective {
     width: 90px;
 }
+#instructions {
+    border-radius: 10px;
+    background: white;
+    color: black;
+    padding: 10px;
+    margin: 10px;
+}
 #popup {
     visibility: hidden;
     position: absolute;

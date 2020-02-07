@@ -337,13 +337,19 @@ function inventoryAdd(x, y){
 // updates the inventory GUI when an item is selected
 function selectInventory(e){
     // remove border from previous selected item
-    if (invSelected != "none") {
-        console.log(document.getElementsByClassName(invSelected));
+    if (invSelected == e.target.classList[0]) {
         document.getElementsByClassName(invSelected)[0].style.border = "0";
+        invSelected = "none";
+        message.innerHTML = "Back to lickin' stuff!";
+    } else {
+        if (invSelected != "none") {
+            document.getElementsByClassName(invSelected)[0].style.border = "0";
+        }
+        // update to what they clicked
+        invSelected = e.target.classList[0];
+        e.target.style.border = "2px solid rgb(39, 21, 14)";
+        message.innerHTML = "Ready to place " + invSelected + "!";
     }
-    // update to what they clicked
-    invSelected = e.target.classList[0];
-    e.target.style.border = "2px solid rgb(39, 21, 14)";
 }
 
 // checks if tongue hits a block and returns those coordinates, adds block to inventory
@@ -445,6 +451,8 @@ function placeBlock(e) {
         gameBoard[placeX][placeY] = invSelected;
         // draw tongue 
         drawTongue(placeX*20, placeY*20);
+        // update message
+        message.innerText = "Placed that " + invSelected + ".";
         // remove from inventory
         inventory[invSelected]--
         // update number on GUI
@@ -519,7 +527,8 @@ function gameLoop() {
     if (invSelected != "none") {
         game.removeEventListener("click", tongue);
         game.addEventListener("click", placeBlock)
-    } else {
+    } else { // can't place block
+        game.removeEventListener("click", placeBlock);
         game.addEventListener("click", tongue);
     }
 }
