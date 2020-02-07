@@ -168,7 +168,6 @@ function renderTerrain() {
 }
 
 // initialize the terrain, creatures, and physics
-
 newTerrain();
 var frog = new Creature(Math.floor(Math.random()*game.width), 120, "purple", 30, 30); // change height to 120
 var fly = new Creature(Math.floor(Math.random()*game.width), 20, "black", 20, 20);
@@ -348,7 +347,7 @@ function selectInventory(e){
         // update to what they clicked
         invSelected = e.target.classList[0];
         e.target.style.border = "2px solid rgb(39, 21, 14)";
-        message.innerHTML = "Ready to place " + invSelected + "!";
+        message.innerHTML = "Let's place some " + invSelected + "!";
     }
 }
 
