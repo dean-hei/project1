@@ -169,15 +169,23 @@ function renderTerrain() {
             ctx.imageSmoothingEnabled = false;
             switch (gameBoard[i][j]) {
                 case ("treasure"):
+                    // ctx.fillStyle = treasureDesc;
+                    // ctx.fillRect(i*20, j*20, 20, 20);
                     ctx.drawImage(blockImg, 12, 0, 5, 5, i*20, j*20, 20, 20);
                     break;
                 case ("stone"):
+                    // ctx.fillStyle = stoneDesc;
+                    // ctx.fillRect(i*20, j*20, 20, 20);
                     ctx.drawImage(blockImg, 4, 0, 4, 4, i*20, j*20, 20, 20);
                     break;
                 case ("mud"):
+                    // ctx.fillStyle = mudDesc;
+                    // ctx.fillRect(i*20, j*20, 20, 20);
                     ctx.drawImage(blockImg, 0, 0, 4, 4, i*20, j*20, 20, 20);
                     break;
                 case ("leaf"):
+                    // ctx.fillStyle = leafDesc;
+                    // ctx.fillRect(i*20, j*20, 20, 20);
                     if (j < gameBoard[i].length - 6) {
                         for (let k=0; k<6; k++) {
                             if (gameBoard[i][j+k] != "leaf") {
@@ -197,8 +205,6 @@ function renderTerrain() {
                         }
                     } else {
                     ctx.drawImage(blockImg, 8, 0, 4, 4, i*20, j*20, 20, 20);
-                    // blockImg.src = "img/tool2.png";
-                    // ctx.drawImage(blockImg, i*20, j*20, 20, 20)
                     }
             }
         }
