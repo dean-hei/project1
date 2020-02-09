@@ -1,14 +1,14 @@
 # Project1: Pixel Hopper (FrogCraft)
-### by dean
+### by dean-hei
 
 ## Game Link
+https://dean-hei.github.io/project1/
 
-## Wireframe
+## 1. Project Planning
 
 ![](img/wireframe.jpg)
 *Initial wireframe*
 
-## 1. Project Planning
 I want to build a pared down version of minecraft that would be two dimensional and have limited function, but essentially be a platformer with scenery manipulation. I wanted use basic HTML, CSS, and JS to create a viewer window where the game takes place, draw the scenery in CSS canvas, and then track game states and player movement using javascript funcionality. To make it unique, I came up with the concept of the player character being a frog, then the function of picking and placing blocks could be made visible to the user as the frog tongue. Once the terrain was spawning, and the frog could pick up blocks, I had to implement a inventory system and GUI for the user to place blocks. I added a win state so that the game has a general goal other than being a creative tool.
 
 ## 2. MVP
